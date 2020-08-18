@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Monster Attack</title>
+    <link rel="stylesheet" type="text/css" href="app.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="game-terminal">
+            <div class="player player1">
+                <h1>You</h1>
+                <div class="health1">{{power1}}</div>
+                <p class="p-result" v-if="result">{{playerMetrics}}</p>
+            </div>
+            <div class="player player2">
+                <h1>Monster</h1>
+                <div class="health2">{{power2}}</div>
+                  <p class="m-result" v-if="result">{{monsterMetrics}}</p>
+            </div>
+        </div>
+        <div class="game-controls">
+            <template v-if="show">
+                <button id="attack" @click="attack">Attack</button>
+                <!-- <button class="special-attack">Special Attack</button> -->
+                <button id="heal" @click="heal">Heal</button>
+                <button id="giveup" @click="giveup"> Give up</button>
+            </template>
+            <button class="start" v-if="!show" @click="show = !show">Start Game</button>
+        </div>
+        <div class='logs'>
+            <ul v-for="log in logs" >
+                <li class="player-attack">{{log[0]}}</li>
+                <li class="monster-attack">{{log[1]}}</li>
+            </ul>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+
+        new Vue({
+            el: '#app',
+            data: {
+                show: false,
+                power1: 100,
+                power2: 100,
+                healingPower: 5,
+                logs: [],
+                result:false,
+                PlayerMetrics:'',
+                monsterMetrics:''
+            },
+            watch: {
+                power1: function (val) {
+                    if (val > 100) {
+                        this.power1 = 100
+                    }
+                    if(val<= 0){
+                        this.playerMetrics = 'you lost the game'
+                        this.monsterMetrics = 'monster won the game'
+                        this.refresh();
+                    }
+                },
+                power2: function (val) {
+                    if (val > 100) {
+                        this.power2 = 100
+                    }
+                    if(val <= 0){
+                        this.playerMetrics = 'you won  the game'
+                        this.monsterMetrics = 'monster lost the game'
+                        this.refresh()
+                    }
+                }
+
+
+            },
+
+            methods: {
+
+                power: function () {
+                    return Math.floor(Math.random() * 10)
+                },
+
+                refresh:function(){
+                         this.result = true;
+                         setTimeout(()=>{
+                            this.result = false;
+                            this.show = false;
+                            this.logs =[];
+                            this.giveup()
+                        },3000);
+                },
+
+
+
+                attack: function () {
+                    const attack1 = this.power()
+                    const attack2 = this.power()
+                    this.power1 -= attack1
+                    this.power2 -= attack2
+                    this.changeWidth()
+
+                    this.logs.push([`You attacked monster and damage ${attack2}%`, `monster attacked you and damage ${attack1}%`])
+                },
+
+                heal: function () {
+                    if (this.healingPower <= 0) {
+                        return alert('Healing Powers are not available')
+                    }
+
+                    this.power1 += this.power()
+                    this.power2 += this.power()
+                    this.healingPower -= 1
+                    this.changeWidth()
+                },
+
+                giveup: function () {
+                    this.show = !this.show
+                    this.power1 = 100
+                    this.power2 = 100
+                    this.logs =[]
+                    this.changeWidth()
+                },
+                changeWidth: function () {
+                    let player1 = document.querySelector('.health1')
+                    let player2 = document.querySelector('.health2')
+                    player1.style.width = this.power1 + '%'
+                    player2.style.width = this.power2 + '%'
+                }
+
+            }
+        })
+    </script>
+</body>
+
+</html>
